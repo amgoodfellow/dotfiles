@@ -8,7 +8,7 @@ export M2_HOME=/home/aaron/uportal/maven
 export M2=$M2_HOME/bin
 export PATH=$M2:$PATH
 
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 export PATH=$JAVA_HOME/bin:$PATH
 export ANT_HOME=/home/aaron/uportal/ant
 export PATH=$PATH:$ANT_HOME/bin
@@ -34,7 +34,7 @@ source ~/extras/zsh-git-prompt/zshrc.sh
 
 precmd() {
 
-  PROMPT="${cyan}%n@%m${red}%~ %{$reset_color%}$(git_super_status) ${green}%*%f
+  PROMPT="${green}%n${red}%~ %{$reset_color%}$(git_super_status    )
 ${blue}> "
 
 }
@@ -56,9 +56,29 @@ compinit
 #Does an 'ls' command every time one changes the directory
 cd() {
 	builtin cd "$@";
-	ls; 
+	ls;
 }
 
-alias lll='ll -rt'
+function tommy {
+  for i in "$@"; do
+	  if [[ $i == "start" ]]; then
+		  $TOMCAT_HOME/bin/startup.sh
+	  elif [[ $i == "stop" ]]; then
+		  $TOMCAT_HOME/bin/shutdown.sh
+	  elif [[ $i == "clean" ]]; then
+		  rm -rf $TOMCAT_HOME/webapps/*
+			rm -rf $TOMCAT_HOME/work/*
+			rm -rf $TOMCAT_HOME/temp/*
+    elif [[ $i == "status" ]]; then
+		  ps aux | grep -v 'grep' | grep 'tomcat'
+		else
+      echo "please type start, stop, clean, or status"
+    fi
+  done
+}
+
+
+alias lll='ls -lart'
+alias webapp=~/uportal/uportal/bin/webapp_cntl.sh
 source /home/aaron/extras/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /home/aaron/extras/zsh-history-substring-search/zsh-history-substring-search.zsh
