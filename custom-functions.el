@@ -25,3 +25,20 @@
   "Create a simple Javadoc comment"
   (interactive "sParam: \nsReturn: \n")
   (insert (concat "/**\n*\n*\n*\n* @param " param "\n* @return " return "\n*/")))
+
+(defun my/stringify-region (start end)
+  "Transforms a line like `<line>` to `\"<line>\" +`"
+  (interactive "r")
+  (narrow-to-region start end)
+
+  (goto-char (point-min))
+  (while (< (point) end)
+    (beginning-of-line)
+    (insert "\"")
+    (end-of-line)
+    (insert " \"  +")
+    (forward-line 1))
+  (backward-char 1)
+  (delete-char 1)
+  (insert ");")
+  (widen))
