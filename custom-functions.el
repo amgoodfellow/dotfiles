@@ -21,6 +21,14 @@
    (filter-buffer-substring (region-beginning)(region-end))
    "\n```")))
 
+(defun my/surround-with-tag (word)
+  "Surround region with specified param"
+  (interactive "sWord: \n")
+  (insert (concat "<" word ">"
+                  (filter-buffer-substring (region-beginning) (region-end))
+                  "</" word ">")
+          (delete-region (region-beginning) (region-end))))
+
 (defun my/javadoc-comment (param return)
   "Create a simple Javadoc comment"
   (interactive "sParam: \nsReturn: \n")
