@@ -38,6 +38,7 @@ values."
                  javascript-backend 'lsp
                  js2-basic-offset 2
                  js-indent-level 2
+                 js2-strict-missing-semi-warning nil
                  javascript-fmt-tool 'prettier)
      yaml
      lsp
@@ -330,6 +331,8 @@ you should place your code here."
   (add-to-list 'load-path "/Users/aaron/.emacs.d/own_libraries/")
   (load "~/emacs-extras/custom-functions.el")
   (setq org-babel-command:racket "/usr/local/bin/racket")
+  (setq prettier-js-args '("--no-semi"
+                           "--single-quote"))
   (setq-default fill-column 100)
 	(setq tab-width 2)
 	(defvaralias 'c-basic-offset 'tab-width)
@@ -345,45 +348,78 @@ you should place your code here."
                                    (maxima . t)
                                    (python . t)
                                    (lisp . t)
+                                   (http . t)
                                    (js . t)
                                    (java . t)
                                    (C . t)
                                    (scheme . t)))
     (setq org-babel-python-command "python3" )
     (setq org-agenda-files (quote ("~/Documents/org"
-                                   "~/Documents/org/todos")))
+                                   "~/Documents/org/tracking"
+                                   "~/Documents/org/todos"
+                                   "~/Documents/org/work")))
+    (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
+    (let ((default-directory "~/Documents/org/"))
+      (setq my/org-templates (expand-file-name ".org-templates"))
+      (setq my/journal (expand-file-name "journal.org")))
     (setq org-capture-templates
           '(("t" "todo" entry (file "~/Documents/org/refile.org")
-	           "* TODO %?\n%u\n%a\n" :clock-in t :clock-resume t)
-	          ("m" "Meeting" entry (file "~/Documents/org/refile.org")
-	           "* MEETING with %? :MEETING:\n%t" :clock-in t :clock-resume t)
-	          ("s" "School Assignment" entry (file "~/Documents/org/todos/school.org")
-	           "** %?\nDEADLINE:%t\n")
-	          ("w" "Work Project" entry (file "~/Documents/org/todos/work.org")
-	           "* UNASSIGNED %? [/]\n:PROPERTIES:\n:ASIGNEE:\nDEADLINE:%t\n:CATEGORY:\n:END:\n** Sub-Task")
-	          ("c" "Contact" entry (file "~/Documents/org/contacts.org")
-	           "* %?\n:PROPERTIES:\n:ADDRESS:\n:PHONE:\n:BIRTHDAY:\n:EMAIL:\n:COMPANY:\n:POSITION:\n:GROUPS:\n:END:\n** Notes")
+	           "* TODO %?")
+	          ("s" "School Assignment" entry (file "~/Documents/org/refile.org")
+             (file (format "%s/%s" my/org-templates "school-assignment.org")))
+            ("c" "chore" entry (file "~/Documents/org/refile.org")
+             "* %? %^{chore-name}\nDEADLINE:\n:PROPERTIES:\n:category:\n:END:")
+	          ("C" "Contact" entry (file "~/Documents/org/contacts.org")
+	           (file "~/Documents/org/tracking/contacts.org"))
+            ("a" "Article" entry (file "~/Documents/org/tracking/articles.org")
+             (file "~/Documents/org/.org-templates/article.org"))
+            ("i" "Idea" entry (file "~/Documents/org/tracking/ideas.org")
+             (file "~/Documents/org/.org-templates/idea.org"))
+            ("j" "Journal" entry (file+olp+datetree "~/Documents/org/journal.org")
+             (file "~/Documents/org/.org-templates/journal-entry.org"))
+            ("g" "Grocery" entry (file+headline "~/Documents/org/todos/shopping.org" "List")
+             "* %^{item}")
+            ;-------------------
+            ("I" "Interactions")
+            ("Ig" "Interaction - general" entry (file "~/Documents/org/refile.org")
+             "* INTERACTION with %^{prompt}\n:PROPERTIES:\n:CATEGORY:general\n:TYPE:\n:END:\n** Notes:\n%?"
+             :clock-in t
+             :clock-keep t)
+            ("Iw" "Work Interaction" entry (file "~/Documents/org/tracking/interactions.org")
+            (file "~/Documents/org/.org-templates/work-interaction.org")
+            :clock-in t
+            :clock-keep t)
+            ("If" "Family Interaction" entry (file "~/Documents/org/tracking/interactions.org")
+             (file "~/Documents/org/.org-templates/family-interaction.org")
+             :clock-in t
+             :clock-keep t)
+            ;-------------------
+            ("w" "Work")
+            ("wg" "Work - general" entry (file "~/Documents/org/work/refile.org")
+             "* %? :work:\nPROPERTIES:\n:asigner:\n:asignee:\n:deadline:\n:END:")
+	          ("wp" "Major Project" entry
+             (file+headline "~/Documents/org/work/projects.org" "Active")
+             (file "~/Documents/org/.org-templates/work-project.org"))
+	          ("wt" "Minor Task" entry
+             (file "~/Documents/org/work/tasks.org")
+             (file "~/Documents/org/.org-templates/work-task.org"))
+	          ("wi" "Work Issue" entry
+             (file "~/Documents/org/work/refile.org")
+             (file "~/Documents/org/.org-templates/work-issue"))
+            ;-------------------
+            ("b" "Books")
+            ("bl" "Book Log" entry (file+headline "~/Documents/org/tracking/books.org" "Reading")
+             (file "~/Documents/org/.org-templates/book-log.org"))
+            ("br" "Book Recomendation" entry (file+headline "~/Documents/org/tracking/books.org" "Recomended")
+             (file "~/Documents/org/.org-templates/book-recommend.org"))
 	           ))
     ))
 
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(mac-command-modifier nil)
- '(org-agenda-files (quote ("~/Documents/todos/school.org")))
- '(package-selected-packages
-   (quote
-    (web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern tern coffee-mode yaml-mode ox-gfm zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data toml-mode racer pos-tip cargo rust-mode vimrc-mode slime-company slime dactyl-mode common-lisp-snippets yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic xterm-color shell-pop multi-term git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter eshell-z eshell-prompt-extras esh-help diff-hl racket-mode faceup unfill smeargle orgit org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download mwim mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy evil-magit magit magit-popup git-commit with-editor company-statistics company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;; custom-set-faces was added by Custom.
+;; If you edit it by hand, you could mess it up, so be careful.
+;; Your init file should contain only one such instance.
+;; If there is more than one, they won't work right.
+
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use
@@ -394,11 +430,10 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(mac-command-modifier nil)
- '(org-agenda-files (quote ("~/Documents/todos/school.org")))
+ '(mac-command-modifier (quote meta))
  '(package-selected-packages
    (quote
-    (csv-mode web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern tern coffee-mode yaml-mode ox-gfm zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data toml-mode racer pos-tip cargo rust-mode vimrc-mode slime-company slime dactyl-mode common-lisp-snippets yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic xterm-color shell-pop multi-term git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter eshell-z eshell-prompt-extras esh-help diff-hl racket-mode faceup unfill smeargle orgit org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download mwim mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy evil-magit magit magit-popup git-commit with-editor company-statistics company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern tern coffee-mode yaml-mode ox-gfm zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data toml-mode racer pos-tip cargo rust-mode vimrc-mode slime-company slime dactyl-mode common-lisp-snippets yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic xterm-color shell-pop multi-term git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter eshell-z eshell-prompt-extras esh-help diff-hl racket-mode faceup unfill smeargle orgit org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download mwim mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy evil-magit magit magit-popup git-commit with-editor company-statistics company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -406,3 +441,4 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  )
 )
+
