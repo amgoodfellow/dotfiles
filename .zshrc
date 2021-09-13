@@ -1,34 +1,42 @@
 # System Variables -------------------------------------
-export PATH="$HOME/.cargo/bin:$PATH"
 HISTFILE=~/.histfile
 HISTSIZE=8000
-SAVEHIST=8000
-# ------------------------------------------------------
-
-
-##Prompt -----------------------------------------------
-export PS1="%d  
->  "
-
-#-------------------------------------------------------
-
-# Configured by zsh-newuser-install
-setopt autocd
-bindkey -e
-
+SAVEHIST=10000
+setopt autocd extendedglob nomatch notify
+unsetopt beep
+bindkey -v
+# End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
-zstyle :compinstall filename '/Users/aaron/.zshrc'
+zstyle :compinstall filename '/home/amgoodfellow/.zshrc'
 
 autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
-##Sets up prompt and prompt plugins---------------------
-source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source /usr/local/share/zsh-history-substring-search/zsh-history-substring-search.zsh
 
+# Source from $HOME/.profile
+source $HOME/.profile
 
-# User-defined functions--------------------------------
+# Antigen
+source /usr/share/zsh/share/antigen.zsh
+
+# Load the oh-my-zsh's library
+antigen use oh-my-zsh
+# Self-explanatory
+antigen bundle git
+# Syntax highlighting bundle.
+antigen bundle zsh-users/zsh-syntax-highlighting
+# Fish-like auto suggestions
+antigen bundle zsh-users/zsh-autosuggestions
+# Extra zsh completions
+antigen bundlezsh-users/zsh-completions
+#substring search
+antigen bundle zsh-users/zsh-history-substring-search
+
+antigen theme kphoen
+# Tell antigen that you're done
+antigen apply
+
 
 # Autorun exa on every cd
 cd() {
@@ -36,9 +44,7 @@ cd() {
   exa;
 }
 
-
 # I can never remember the commands for different compressed files
-# now I don't have to
 extract () {
   if [ -f $1 ] ; then
     case $1 in
@@ -64,10 +70,10 @@ extract () {
 
 
 # Alisases ---------------------------------------------
-alias lll='exa --all'
-alias pip='pip3'
+alias vim=nvim
 alias ls='exa'
-alias zshrc='source ~/.zshrc'
-alias nvimrc='nvim ~/.config/nvim/init.vim'
+alias ll='exa --long'
+alias ll='exa --long --all'
 alias format='find src/ -name "*.js" -exec prettier --write --no-semi --single-quote {} \;'
-alias untar='extract'
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
