@@ -20,7 +20,7 @@
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
 ;(setq doom-font (font-spec :family "monospace" :size 21))
-(setq doom-font (font-spec :family "hasklig" :size 21 ))
+(setq doom-font (font-spec :family "hasklig" :size 16 ))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -29,7 +29,7 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/Dropbox/org-new/")
+(setq org-directory "~/Documents/")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -52,7 +52,7 @@
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
 
-(load! "~/extras/custom-functions.el")
+;(load! "~/.doom.d/custom-functions.el")
 
 (after! evil
   (setq evil-escape-key-sequence "jj")
@@ -67,26 +67,11 @@
         '((sequence "UNASSIGNED" "ASSIGNED" "IN-PROGRESS" "|" "BLOCKED" "DONE")
           (sequence "TODO" "WAITING" "|" "DONE")))
 
-(map! :localleader
-      :map markdown-mode-map
-      :prefix ("i" . "Insert")
-      :desc "Blockquote"    "q" 'markdown-insert-blockquote
-      :desc "Bold"          "b" 'markdown-insert-bold
-      :desc "Code"          "c" 'markdown-insert-code
-      :desc "Emphasis"      "e" 'markdown-insert-italic
-      :desc "Footnote"      "f" 'markdown-insert-footnote
-      :desc "Code Block"    "s" 'markdown-insert-gfm-code-block
-      :desc "Image"         "i" 'markdown-insert-image
-      :desc "Link"          "l" 'markdown-insert-link
-      :desc "List Item"     "n" 'markdown-insert-list-item
-      :desc "Pre"           "p" 'markdown-insert-pre
-      (:prefix ("h" . "Headings")
-        :desc "One"   "1" 'markdown-insert-atx-1
-        :desc "Two"   "2" 'markdown-insert-atx-2
-        :desc "Three" "3" 'markdown-insert-atx-3
-        :desc "Four"  "4" 'markdown-insert-atx-4
-        :desc "Five"  "5" 'markdown-insert-atx-5
-        :desc "Six"   "6" 'markdown-insert-atx-6))
+  (map! :map (org-roam-mode-map org-mode-map)
+        :ni "C-c n i" 'org-roam-node-insert
+        :ni "C-c n f" 'org-roam-node-find
+        :ni "C-c n c" 'org-roam-capture))
+
 
 (after! evil
   (map! :map evil-window-map
@@ -99,20 +84,19 @@
           ))
         ))
 
+(after! java
+  ;; current VSCode defaults
+  (setq lsp-java-vmargs '("-XX:+UseParallelGC" "-XX:GCTimeRatio=4" "-XX:AdaptiveSizePolicyWeight=90" "-Dsun.zip.disableMemoryMapping=true" "-Xmx2G" "-Xms100m")))
 
-(use-package org-mind-map
-  :general
-  (:keymaps 'org-mode-map
-            :states 'normal
-            "m e m" '(org-mind-map-write :wk "Export mind-map") ))
-  ;(setq org-capture-templates
-  ;      '(("h" "Homework" entry (file+headline "~/Dropbox/task.org"  "Homework")
-  ;         "* TODO %?\n%U\n%a\n")
-  ;        ("s" "Schedule" entry (file+headline "~/Dropbox/task.org" "Schedule")
-  ;         "* TODO %?\n%U\n%a\n")
-  ;        ("p" "Project" entry (file+headline "~/Dropbox/task.org" "Project")
-  ;         "* TODO %?\n%U\n%a\n")))
-  )
+; Custom global keybindings
+(map! "C-y" #'yas-insert-snippet)
+
+(setq +format-on-save-enabled-modes
+      '(not emacs-lisp-mode  ; elisp's mechanisms are good enough
+            sql-mode         ; sqlformat is currently broken
+            tex-mode         ; latexindent is broken
+            latex-mode
+            java-mode))
 
 ;; End org specific things
 (custom-set-variables
