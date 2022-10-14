@@ -9,17 +9,25 @@
 (setq user-full-name "Aaron Goodfellow"
       user-mail-address "amgoodfellow@protonmail.com")
 
-;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
-;; are the three important ones:
+;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
-;; + `doom-font'
-;; + `doom-variable-pitch-font'
-;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;; - `doom-font' -- the primary font to use
+;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
+;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
 ;;   presentations or streaming.
+;; - `doom-unicode-font' -- for unicode glyphs
+;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
 ;;
-;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
-;; font string. You generally only need these two:
-;(setq doom-font (font-spec :family "monospace" :size 21))
+;; See 'C-h v doom-font' for documentation and more examples of what they
+;; accept. For example:
+;;
+;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+;;
+;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
+;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
+;; refresh your font settings. If Emacs still can't find your font, it likely
+;; wasn't installed correctly. Font issues are rarely Doom issues!
 (setq doom-font (font-spec :family "hasklig" :size 21 ))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -27,18 +35,32 @@
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-gruvbox)
 
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/Dropbox/org-new/")
-
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
-;; Here are some additional functions/macros that could help you configure Doom:
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/Documents/org")
+(setq org-roam-directory "~/Documents/org/roam")
+
+;; Whenever you reconfigure a package, make sure to wrap your config in an
+;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
+;;
+;;   (after! PACKAGE
+;;     (setq x y))
+;;
+;; The exceptions to this rule:
+;;
+;;   - Setting file/directory variables (like `org-directory')
+;;   - Setting variables which explicitly tell you to set them before their
+;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
+;;   - Setting doom variables (which start with 'doom-' or '+').
+;;
+;; Here are some additional functions/macros that will help you configure Doom.
 ;;
 ;; - `load!' for loading external *.el files relative to this one
-;; - `use-package' for configuring packages
+;; - `use-package!' for configuring packages
 ;; - `after!' for running code after a package has loaded
 ;; - `add-load-path!' for adding directories to the `load-path', relative to
 ;;   this file. Emacs searches the `load-path' when you load packages with
@@ -46,13 +68,18 @@
 ;; - `map!' for binding new keys
 ;;
 ;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c g k').
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
 ;; This will open documentation for it, including demos of how they are used.
+;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
+;; etc).
 ;;
-;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
+;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-(load! "~/extras/custom-functions.el")
+;; Load custom functions
+(load! "~/.doom/custom-functions.el")
+
+(dirvish-override-dired-mode)
 
 (after! evil
   (setq evil-escape-key-sequence "jj")
@@ -61,32 +88,43 @@
 (after! rustic
   (setq rustic-lsp-server 'rust-analyzer))
 
+;; For Java LSP server
+(setq lsp-java-vmargs
+      (list
+         "-noverify"
+         "-Xmx1G"
+         "-XX:+UseG1GC"
+         "-XX:+UseStringDeduplication"
+         "-javaagent:/home/amgoodfellow/.doom.d/lombok.jar"))
+
+(setq initial-major-mode 'org-mode)
+
 ;; Org mode configurations
 (after! org
   (setq org-todo-keywords
         '((sequence "UNASSIGNED" "ASSIGNED" "IN-PROGRESS" "|" "BLOCKED" "DONE")
           (sequence "TODO" "WAITING" "|" "DONE")))
 
-(map! :localleader
-      :map markdown-mode-map
-      :prefix ("i" . "Insert")
-      :desc "Blockquote"    "q" 'markdown-insert-blockquote
-      :desc "Bold"          "b" 'markdown-insert-bold
-      :desc "Code"          "c" 'markdown-insert-code
-      :desc "Emphasis"      "e" 'markdown-insert-italic
-      :desc "Footnote"      "f" 'markdown-insert-footnote
-      :desc "Code Block"    "s" 'markdown-insert-gfm-code-block
-      :desc "Image"         "i" 'markdown-insert-image
-      :desc "Link"          "l" 'markdown-insert-link
-      :desc "List Item"     "n" 'markdown-insert-list-item
-      :desc "Pre"           "p" 'markdown-insert-pre
-      (:prefix ("h" . "Headings")
-        :desc "One"   "1" 'markdown-insert-atx-1
-        :desc "Two"   "2" 'markdown-insert-atx-2
-        :desc "Three" "3" 'markdown-insert-atx-3
-        :desc "Four"  "4" 'markdown-insert-atx-4
-        :desc "Five"  "5" 'markdown-insert-atx-5
-        :desc "Six"   "6" 'markdown-insert-atx-6))
+
+  (setq-default elfeed-search-filter "@1-day-ago +unread ")
+  (setq org-babel-clojure-backend 'cider)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+  ;; org agenda config
+  (setq org-agenda-todo-ignore-scheduled 'future)
+  (setq org-agenda-todo-ignore-scheduled t)
+  (setq org-agenda-tags-todo-honor-ignore-options t)
+  ;; log the time when I clock out
+  (setq org-log-done 'time)
+
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file "~/Documents/org/inbox.org")
+           "* TODO %^{title?}\n")
+          ("T" "Todo Clipboard" entry (file "~/Documents/org/inbox.org")
+           "* TODO %?\n%U\n   %c" :empty-lines 1)
+          ("s" "Scheduled" entry (file+headline "~/Documents/org/task.org" "Schedule")
+           "* TODO %?\n%U\n%a\n")
+          ("p" "Project" entry (file+headline "~/Documents/org/task.org" "Project")
+           "* TODO %?\n%U\n%a\n"))))
 
 (after! evil
   (map! :map evil-window-map
@@ -96,23 +134,7 @@
           :n :desc "Up"    "<up>" 'evil-window-up
           :n :desc "Down"  "<down>" 'evil-window-down
           :n :desc "Right" "<right>" 'evil-window-right
-          ))
-        ))
-
-
-(use-package org-mind-map
-  :general
-  (:keymaps 'org-mode-map
-            :states 'normal
-            "m e m" '(org-mind-map-write :wk "Export mind-map") ))
-  ;(setq org-capture-templates
-  ;      '(("h" "Homework" entry (file+headline "~/Dropbox/task.org"  "Homework")
-  ;         "* TODO %?\n%U\n%a\n")
-  ;        ("s" "Schedule" entry (file+headline "~/Dropbox/task.org" "Schedule")
-  ;         "* TODO %?\n%U\n%a\n")
-  ;        ("p" "Project" entry (file+headline "~/Dropbox/task.org" "Project")
-  ;         "* TODO %?\n%U\n%a\n")))
-  )
+          ))))
 
 ;; End org specific things
 (custom-set-variables
