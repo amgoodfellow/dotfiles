@@ -124,7 +124,13 @@
           ("s" "Scheduled" entry (file+headline "~/Documents/org/task.org" "Schedule")
            "* TODO %?\n%U\n%a\n")
           ("p" "Project" entry (file+headline "~/Documents/org/task.org" "Project")
-           "* TODO %?\n%U\n%a\n"))))
+           "* TODO %?\n%U\n%a\n")))
+
+  (map! :map (org-roam-mode-map org-mode-map)
+        :ni "C-c n i" 'org-roam-node-insert
+        :ni "C-c n f" 'org-roam-node-find
+        :ni "C-c n c" 'org-roam-capture))
+
 
 (after! evil
   (map! :map evil-window-map
