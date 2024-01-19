@@ -1,9 +1,12 @@
-{ config, pkgs, lib, libs, ... }:
+{ config, pkgs, lib, libs, specialArgs, ... }:
+let
+  inherit (specialArgs) isMacOS;
+in
 {
   programs.git = {
     enable = true;
     userName = "Aaron Goodfellow";
-    userEmail = "amgoodfellow@protonmail.com";
+    userEmail = if isMacOS then "agoodfellow@nowsecure.com" else "amgoodfellow@protonmail.com";
 
     delta = {
       enable = true;
