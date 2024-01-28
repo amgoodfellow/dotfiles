@@ -33,13 +33,13 @@
     homeConfigurations = {
       "desktop" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [ ./linux-home.nix ./common-home.nix ./neovim.nix ./git.nix ./zsh.nix ];
+        extraSpecialArgs = {inherit inputs outputs; isMacOS = false;};
+        modules = [ ./linux-home.nix ./common-home.nix ./neovim.nix ./git.nix ./zsh.nix stylix.homeManagerModules.stylix];
       };
       "laptop" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [ ./linux-home.nix ./common-home.nix ./neovim.nix ./git.nix ./zsh.nix ];
+        extraSpecialArgs = {inherit inputs outputs; isMacOS = false;};
+        modules = [ ./linux-home.nix ./common-home.nix ./neovim.nix ./git.nix ./zsh.nix stylix.homeManagerModules.stylix];
       };
       "work" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.aarch64-darwin; # Home-manager requires 'pkgs' instance
