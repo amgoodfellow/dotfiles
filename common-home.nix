@@ -1,30 +1,25 @@
-{ pkgs, stylix, ... }: {
+{ pkgs, isWork, isMacOS, stylix, ... }: {
 
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
+  programs.home-manager.enable = true;
   home.username = if isWork then "agoodfellow" else "amgoodfellow";
-  home.homeDirectory = "";
-
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "23.11"; # Please read the comment before changing.
+  home.homeDirectory = (if isMacOS then "/Users/" else "/home/") + (if isWork then "agoodfellow" else "amgoodfellow");
 
   home.packages = with pkgs; [
+    clang
+    cmake
     delta
     fd
     neofetch
     nixfmt
+    sqlite
     tree
     unzip
     zip
-    # Fonts
-    hasklig
   ];
+
+  nixpkgs.config.allowUnfree = true;
 
   fonts.fontconfig.enable = true;
 
@@ -59,11 +54,15 @@
   #  /etc/profiles/per-user/agoodfellow/etc/profile.d/hm-session-vars.sh
   #
   home.sessionVariables = {
-    # EDITOR = "emacs";
+    EDITOR = "emacs";
+  };
+
+   programs.emacs = {
+    enable = true;
+    package = pkgs.emacs;
   };
 
   # Let Home Manager install and manage itself.
-  programs.home-manager.enable = true;
 
   # Other programs that have home-manager integration:
 
@@ -129,4 +128,5 @@
       name = "Noto Color Emoji";
     };
   };
+  home.stateVersion = "23.11";
 }
