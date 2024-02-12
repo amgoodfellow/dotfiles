@@ -88,15 +88,6 @@
 (after! rustic
   (setq rustic-lsp-server 'rust-analyzer))
 
-;; For Java LSP server
-(setq lsp-java-vmargs
-      (list
-         "-noverify"
-         "-Xmx1G"
-         "-XX:+UseG1GC"
-         "-XX:+UseStringDeduplication"
-         "-javaagent:/home/amgoodfellow/.doom.d/lombok.jar"))
-
 (setq initial-major-mode 'org-mode)
 
 ;; Org mode configurations
