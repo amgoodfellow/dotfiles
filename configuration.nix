@@ -68,6 +68,38 @@
     xkbVariant = "";
   };
 
+  services.syncthing = {
+    enable = true;
+    user = "amgoodfellow";
+    configDir = "/home/amgoodfellow/.config/syncthing";   # Folder for Syncthing's settings and keys
+    dataDir = "/home/amgoodfellow/Documents";    # Default folder for new synced folders
+  };
+
+
+  # The desktop is struggling to wake from sleep for some reason
+  systemd = {
+    targets = {
+      sleep = {
+        enable = false;
+        unitConfig.DefaultDependencies = "no";
+      };
+      suspend = {
+        enable = false;
+        unitConfig.DefaultDependencies = "no";
+      };
+      hibernate = {
+        enable = false;
+        unitConfig.DefaultDependencies = "no";
+      };
+      "hybrid-sleep" = {
+        enable = false;
+        unitConfig.DefaultDependencies = "no";
+      };
+    };
+  }; 
+
+
+
   # Enable CUPS to print documents
   services.printing.enable = true;
 
