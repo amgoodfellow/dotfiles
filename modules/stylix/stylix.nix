@@ -1,5 +1,7 @@
-{ config, pkgs, specialArgs, stylix, ... }:
+{ config, lib, pkgs, platform, username, ... }:
 {
+  stylix.image = builtins.toFile (if platform == "MacOS" then "/Users/" else "/home/") + username + "/Pictures/wallpaper.jpeg";
+  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
   stylix.fonts = {
     serif = {
       package = pkgs.dejavu_fonts;
@@ -12,8 +14,8 @@
     };
 
     monospace = {
-      package = pkgs.dejavu_fonts;
-      name = "DejaVu Sans Mono";
+      package = pkgs.fira-code;
+      name = "FiraCode";
     };
 
     emoji = {
