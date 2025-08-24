@@ -1,0 +1,14 @@
+#+TITLE: NAS Configuration
+
+* Prerequisites
+
+** Hardware Config
+Save the output of the following to ~dotfiles/nas/hardware-configuration.nix~
+#+begin_src shell :results output file :file hardware-configuration.nix
+nixos-generate-config --show-hardware-config
+#+end_src
+
+** Networking ID
+#+begin_src shell
+head -c 8 /etc/machine-id
+#+end_src

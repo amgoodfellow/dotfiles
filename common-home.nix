@@ -14,15 +14,18 @@
   home.homeDirectory = (if platform == "MacOS" then "/Users/" else "/home/") + username;
 
   home.packages = with pkgs; [
-    borgbackup
+    alacritty
     clang
     cmake
     delta
     fd
     fira-code
+    gimp
+    inkscape
     neofetch
     nixfmt-rfc-style
     python313Packages.weasyprint
+    spotify
     sqlite
     texliveTeTeX
     tree

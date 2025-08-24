@@ -61,7 +61,14 @@
         Option "XkbVariant" "basic"
       ''
     ];
+  };
 
+  # Syncthing
+  services.syncthing = {
+    enable = true;
+    user = "amgoodfellow";
+    configDir = "/home/amgoodfellow/.config/syncthing"; # Folder for Syncthing's settings and keys
+    dataDir = "/home/amgoodfellow/Documents"; # Default folder for new synced folders
   };
 
   # STEAM
@@ -148,23 +155,16 @@
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
-      alacritty
-      dconf
+      borgbackup
       discord
       firefox
       freecad
-      gimp
-      inkscape
-      insomnia
       libreoffice-qt
       obs-studio
       parsec-bin
       prismlauncher
       prusa-slicer
-      python313Packages.weasyprint
       signal-desktop
-      spotify
-      sqlite
     ];
   };
 

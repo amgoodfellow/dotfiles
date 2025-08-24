@@ -38,6 +38,13 @@
             ./desktop/configuration.nix
           ];
         };
+        nas = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./common-configuration.nix
+            ./nas/configuration.nix
+          ];
+        };
       };
       # Standalone home-manager configuration entrypoint
       # Available through 'home-manager --flake .#desktop'
@@ -51,9 +58,9 @@
           };
           modules = [
             ./common-home.nix
-            ./vim/neovim.nix
-            ./git/git.nix
-            ./zsh.nix
+            ./modules/vim/neovim.nix
+            ./modules/git/git.nix
+            ./modules/zsh.nix
             stylix.homeModules.stylix
           ];
         };
@@ -66,7 +73,7 @@
           };
           modules = [
             ./common-home.nix
-            ./vim/neovim.nix
+            ./modules/vim/neovim.nix
             ./git/git.nix
             ./zsh.nix
             stylix.homeModules.stylix
@@ -81,9 +88,9 @@
           };
           modules = [
             ./common-home.nix
-            ./vim/neovim.nix
-            ./git/git.nix
-            ./zsh.nix
+            ./modules/vim/neovim.nix
+            ./modules/git/git.nix
+            ./modules/zsh.nix
             stylix.homeModules.stylix
           ];
         };
