@@ -1,0 +1,12 @@
+# Editors
+.idea
+.vscode
+/.vim/
+/.nvim/
+Session.vim
+
+# MacOS
+.DS_Store
+
+# Node
+node_modules/

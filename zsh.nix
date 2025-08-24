@@ -5,16 +5,11 @@
       plugins = [ "sindresorhus/pure" ];
     };
     enable = true;
-    enableAutosuggestions = true;
+    autosuggestion.enable = true;
     history.extended = true;
+    history.findNoDups = true;
     historySubstringSearch.enable = true;
-    initExtra = ''
-      # Autorun eza on every cd
-      cd() {
-        builtin cd "$@";
-        eza;
-      }
-
+    initContent = ''
       # I can never remember the commands for different compressed files
       extract () {
         if [ -f $1 ] ; then
@@ -39,10 +34,15 @@
     '';
     profileExtra = "";
     shellAliases = {
+      cd = ''
+        builtin cd "$@";
+        eza;
+      '';
       ls = "eza";
       ll = "eza --long --all";
-      format = ''
+      pformat = ''
         find src/ -name "*.js" -exec prettier --write --no-semi --single-quote {} ;'';
+      hm-update = "home-manager --flake .#desktop";
     };
     syntaxHighlighting.enable = true;
   };

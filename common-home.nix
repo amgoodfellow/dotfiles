@@ -1,19 +1,30 @@
-{ pkgs, isWork, isMacOS, stylix, ... }: {
+{
+  pkgs,
+  username,
+  platform,
+  stylix,
+  ...
+}:
+{
 
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   programs.home-manager.enable = true;
-  home.username = if isWork then "agoodfellow" else "amgoodfellow";
-  home.homeDirectory = (if isMacOS then "/Users/" else "/home/") + (if isWork then "agoodfellow" else "amgoodfellow");
+  home.username = username;
+  home.homeDirectory = (if platform == "MacOS" then "/Users/" else "/home/") + username;
 
   home.packages = with pkgs; [
+    borgbackup
     clang
     cmake
     delta
     fd
+    fira-code
     neofetch
-    nixfmt
+    nixfmt-rfc-style
+    python313Packages.weasyprint
     sqlite
+    texliveTeTeX
     tree
     unzip
     zip
@@ -38,28 +49,19 @@
     # '';
   };
 
-  # Home Manager can also manage your environment variables through
-  # 'home.sessionVariables'. If you don't want to manage your shell through Home
-  # Manager then you have to manually source 'hm-session-vars.sh' located at
-  # either
-  #
-  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  /etc/profiles/per-user/agoodfellow/etc/profile.d/hm-session-vars.sh
-  #
   home.sessionVariables = {
     EDITOR = "emacs";
   };
 
-   programs.emacs = {
+  programs.emacs = {
     enable = true;
     package = pkgs.emacs;
+    extraPackages = epkgs: [
+      epkgs.all-the-icons-nerd-fonts
+      epkgs.graphviz-dot-mode
+      epkgs.treesit-grammars.with-all-grammars
+      epkgs.vterm
+    ];
   };
 
   # Let Home Manager install and manage itself.
@@ -104,9 +106,8 @@
 
   programs.yt-dlp.enable = true;
 
-  stylix.image = /home/amgoodfellow/Pictures/wallpapers/nebula.jpg;
-  stylix.base16Scheme =
-    "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+  stylix.image = /home/amgoodfellow/Pictures/wallpaper.jpeg;
+  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
   stylix.fonts = {
     serif = {
       package = pkgs.dejavu_fonts;

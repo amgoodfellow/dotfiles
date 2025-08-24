@@ -13,44 +13,80 @@
     stylix.url = "github:danth/stylix";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    stylix,
-    ...
-  } @ inputs: let
-    inherit (self) outputs;
-    # Supported systems for your flake packages, shell, etc.
-    systems = [
-      "x86_64-linux"
-      "aarch64-darwin"
-    ];
-  in {
-    nixosConfigurations = {
-      desktop = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [ ./configuration.nix ];
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      stylix,
+      ...
+    }@inputs:
+    let
+      inherit (self) outputs;
+      # Supported systems for your flake packages, shell, etc.
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
+    in
+    {
+      nixosConfigurations = {
+        desktop = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./common-configuration.nix
+            ./desktop/configuration.nix
+          ];
+        };
+      };
+      # Standalone home-manager configuration entrypoint
+      # Available through 'home-manager --flake .#desktop'
+      homeConfigurations = {
+        desktop = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit inputs outputs;
+            username = "amgoodfellow";
+            platform = "linux";
+          };
+          modules = [
+            ./common-home.nix
+            ./vim/neovim.nix
+            ./git/git.nix
+            ./zsh.nix
+            stylix.homeModules.stylix
+          ];
+        };
+        laptop = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit inputs outputs;
+            username = "amgoodfellow";
+            platform = "linux";
+          };
+          modules = [
+            ./common-home.nix
+            ./vim/neovim.nix
+            ./git/git.nix
+            ./zsh.nix
+            stylix.homeModules.stylix
+          ];
+        };
+        work = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.aarch64-darwin; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit inputs outputs;
+            username = "agoodfellow";
+            platform = "MacOS";
+          };
+          modules = [
+            ./common-home.nix
+            ./vim/neovim.nix
+            ./git/git.nix
+            ./zsh.nix
+            stylix.homeModules.stylix
+          ];
+        };
       };
     };
-    # Standalone home-manager configuration entrypoint
-    # Available through 'home-manager --flake .#desktop'
-    homeConfigurations = {
-      desktop = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs; isWork = false; isMacOS = false; };
-        modules = [ ./common-home.nix ./neovim.nix ./git.nix ./zsh.nix stylix.homeManagerModules.stylix];
-      };
-      #laptop = home-manager.lib.homeManagerConfiguration {
-      #  pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-      #  extraSpecialArgs = {inherit inputs outputs; isMacOS = false;};
-      #  modules = [ ./linux-home.nix ./common-home.nix ./neovim.nix ./git.nix ./zsh.nix stylix.homeManagerModules.stylix];
-      #};
-      #work = home-manager.lib.homeManagerConfiguration {
-      #  pkgs = nixpkgs.legacyPackages.aarch64-darwin; # Home-manager requires 'pkgs' instance
-      #  extraSpecialArgs = {inherit inputs outputs; isMacOS = true;};
-      #  modules = [ ./macos-home.nix ./common-home.nix ./neovim.nix ./git.nix ./zsh.nix stylix.homeManagerModules.stylix];
-      #};
-    };
-  };
 }
