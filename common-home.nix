@@ -1,17 +1,21 @@
 {
+  lib,
   pkgs,
   username,
   platform,
   stylix,
   ...
 }:
+let
+  homedir = (if platform == "MacOS" then "/Users/" else "/home/") + username;
+in
 {
 
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   programs.home-manager.enable = true;
   home.username = username;
-  home.homeDirectory = (if platform == "MacOS" then "/Users/" else "/home/") + username;
+  home.homeDirectory = homedir;
 
   home.packages = with pkgs; [
     alacritty
@@ -44,6 +48,13 @@
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
     # ".screenrc".source = dotfiles/screenrc;
+    doom = {
+      enable = true;
+      executable = false;
+      recursive = true;
+      source = ./modules/doom;
+      target = homedir + "/.doom.d";
+    };
 
     # # You can also set the file content immediately.
     # ".gradle/gradle.properties".text = ''

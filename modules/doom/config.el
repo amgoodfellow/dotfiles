@@ -28,7 +28,8 @@
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
 ;; refresh your font settings. If Emacs still can't find your font, it likely
 ;; wasn't installed correctly. Font issues are rarely Doom issues!
-(setq doom-font (font-spec :family "hasklig" :size 21 ))
+                                        ;(setq doom-font (font-spec :family "Fira Code" :size 21 ))
+(setq doom-font (font-spec :family "Fira Code" :size 21))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -77,9 +78,9 @@
 ;; they are implemented.
 
 ;; Load custom functions
-(load! "~/.doom/custom-functions.el")
+                                        ;(load! "~/.doom/custom-functions.el")
 
-(dirvish-override-dired-mode)
+                                        ;(dirvish-override-dired-mode)
 
 (after! evil
   (setq evil-escape-key-sequence "jj")
@@ -90,11 +91,34 @@
 
 (setq initial-major-mode 'org-mode)
 
+(use-package! gleam-ts-mode
+  :config
+  ;; setup formatter to be used by `SPC c f`
+  (after! apheleia
+    (setf (alist-get 'gleam-ts-mode apheleia-mode-alist) 'gleam)
+    (setf (alist-get 'gleam apheleia-formatters) '("gleam" "format" "--stdin"))))
+
+(after! treesit
+  (add-to-list 'auto-mode-alist '("\\.gleam$" . gleam-ts-mode))
+  )
+
+
+(after! eglot
+  :config
+  (set-eglot-client! 'gleam-ts-mode '("gleam" "lsp")))
+
+(after! gleam-ts-mode
+  (unless (treesit-language-available-p 'gleam)
+    ;; compile the treesit grammar file the first time
+    (gleam-ts-install-grammar)))
+
+
 ;; Org mode configurations
 (after! org
   (setq org-todo-keywords
         '((sequence "UNASSIGNED" "ASSIGNED" "IN-PROGRESS" "|" "BLOCKED" "DONE")
           (sequence "TODO" "WAITING" "|" "DONE")))
+
 
 
   (setq-default elfeed-search-filter "@1-day-ago +unread ")
@@ -108,14 +132,14 @@
   (setq org-log-done 'time)
 
   (setq org-capture-templates
-        '(("t" "Todo" entry (file "~/Documents/org/inbox.org")
+        '(("t" "Todo" entry (file+headline "~/Documents/org/tasks.org" "Personal")
            "* TODO %^{title?}\n")
           ("T" "Todo Clipboard" entry (file "~/Documents/org/inbox.org")
            "* TODO %?\n%U\n   %c" :empty-lines 1)
-          ("s" "Scheduled" entry (file+headline "~/Documents/org/task.org" "Schedule")
-           "* TODO %?\n%U\n%a\n")
-          ("p" "Project" entry (file+headline "~/Documents/org/task.org" "Project")
-           "* TODO %?\n%U\n%a\n")))
+          ("w" "Work Task" entry (file+headline "~/Documents/org/tasks.org" "Work")
+           "* TODO %^{title?}%^{CATEGORY}p%^{CREATED_AT|%U}p\n%?")
+          ("p" "Personal Task" entry (file+headline "~/Documents/org/tasks.org" "Personal")
+           "* TODO %^{title?}%^{CATEGORY}p%^{CREATED_AT|%U}p\n%?")))
 
   (map! :map (org-roam-mode-map org-mode-map)
         :ni "C-c n i" 'org-roam-node-insert
