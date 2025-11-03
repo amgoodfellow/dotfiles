@@ -6,19 +6,11 @@
   # A helpful article: https://jvns.ca/blog/2024/02/16/popular-git-config-options/
   programs.git = {
     enable = true;
-    userName = "Aaron Goodfellow";
-    userEmail =
-      if username == "agoodfellow" then "agoodfellow@nowsecure.com" else "amgoodfellow@protonmail.com";
+    settings = {
+      user.name = "Aaron Goodfellow";
+      user.email =
+        if username == "agoodfellow" then "agoodfellow@nowsecure.com" else "amgoodfellow@protonmail.com";
 
-    delta = {
-      enable = true;
-      options = {
-        syntax-theme = "gruvbox-dark";
-        side-by-side = true;
-      };
-    };
-
-    extraConfig = {
       core.editor = "nvim";
       core.excludesfile = builtins.toString ./global-gitignore;
       core.fileMode = false;

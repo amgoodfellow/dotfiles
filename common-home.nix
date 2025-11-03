@@ -21,7 +21,6 @@ in
     alacritty
     clang
     cmake
-    delta
     fd
     fira-code
     gimp
@@ -116,6 +115,14 @@ in
       bind - split-window -v
       bind | split-window -h
     '';
+  };
+
+  programs.delta = {
+    enable = true;
+    options = {
+      syntax-theme = "gruvbox-dark";
+      side-by-side = true;
+    };
   };
 
   programs.yt-dlp.enable = true;
