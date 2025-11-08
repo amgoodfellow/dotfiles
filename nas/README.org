@@ -9,6 +9,50 @@ nixos-generate-config --show-hardware-config
 #+end_src
 
 ** Networking ID
-#+begin_src shell
+#+begin_src shell :results output file :file newtorking-id
 head -c 8 /etc/machine-id
 #+end_src
+
+* Setting up the pool
+
+It seems like it's easiest to set up the ZFS pool outside of nix, not declaratively.
+
+#+begin_quote
+[!NOTE]
+In the future it might be nice to start using something like [[https://github.com/nix-community/disko/tree/master][disko]]
+#+end_quote
+
+1. Choose the name of the pool:
+    #+begin_src shell :results output file :file pool-name
+    echo "main-pool"
+    #+end_src
+
+2. Find all disks on the system
+    #+begin_src bash
+    ls -l /dev/disk/by-id/
+    #+end_src
+
+3. Create the pool
+   #+begin_src bash
+    zpool create -f \
+    -o ashift=12 \
+    $(cat pool-name) \
+    raidz2 /dev/disk/by-id/your-disk-1 ...
+   #+end_src
+
+4. Add a SLOG
+    #+begin_src bash
+    zpool add $(cat pool-name) log /dev/disk/by-id/your-ssd-id
+    # You can add a mirror for redundancy
+    # zpool add your-pool-name log mirror /dev/disk/by-id/device-1 /dev/disk/by-id/device-2
+    #+end_src
+
+5. Add a special device
+    #+begin_src bash
+    zpool add $(cat pool-name) special /dev/disk/by-id/your-ssd-id
+
+    # To let the special device store small files
+    sudo zfs set special_small_blocks=64K $(cat pool-name)
+    #+end_src
+
+

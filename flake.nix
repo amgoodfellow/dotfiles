@@ -40,9 +40,14 @@
         };
         nas = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
+          specialArgs = {
+            inherit inputs;
+            pool-name = builtins.readFile ./nas/pool-name;
+          };
           modules = [
             ./common-configuration.nix
             ./nas/configuration.nix
+            ./nas/zfs.nix
           ];
         };
       };
