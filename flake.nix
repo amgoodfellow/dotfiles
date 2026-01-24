@@ -23,16 +23,15 @@
     }@inputs:
     let
       inherit (self) outputs;
-      # Supported systems for your flake packages, shell, etc.
-      systems = [
-        "x86_64-linux"
-        "aarch64-darwin"
-      ];
     in
     {
       nixosConfigurations = {
         desktop = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
+          specialArgs = {
+            inherit inputs;
+            username = "amgoodfellow";
+          };
           modules = [
             ./common-configuration.nix
             ./desktop/configuration.nix

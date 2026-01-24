@@ -1,12 +1,10 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
 
 {
-
   networking.hostName = "amgoodfellow-desktop";
 
   imports = [
@@ -27,7 +25,6 @@
   # OBS nonsense
   boot.extraModulePackages = with config.boot.kernelPackages; [
     v4l2loopback
-    perf
   ];
   boot.extraModprobeConfig = ''
     options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
@@ -107,16 +104,6 @@
     };
   };
 
-  # Enable CUPS to print documents
-  services.printing.enable = true;
-
-  # Allows printer auto-discovery
-  services.avahi = {
-    enable = true;
-    nssmdns = true;
-    openFirewall = true;
-  };
-
   # Enable sound with pipewire.
   security.rtkit.enable = true;
   services.pipewire = {
@@ -165,13 +152,16 @@
       borgbackup
       discord
       firefox
-      freecad
+      #TODO Replace when turns isn't broken
+      #freecad
       libreoffice-qt
       obs-studio
       parsec-bin
       prismlauncher
       prusa-slicer
       signal-desktop
+      wireguard-tools
+      protonvpn-gui
     ];
   };
 
