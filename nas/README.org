@@ -8,10 +8,12 @@ Save the output of the following to ~dotfiles/nas/hardware-configuration.nix~
 nixos-generate-config --show-hardware-config
 #+end_src
 
+
 ** Networking ID
-#+begin_src shell :results output file :file newtorking-id
+#+begin_src shell :results output file :file networking-id
 head -c 8 /etc/machine-id
 #+end_src
+
 
 * Setting up the pool
 
@@ -27,10 +29,12 @@ In the future it might be nice to start using something like [[https://github.co
     echo "main-pool"
     #+end_src
 
+
 2. Find all disks on the system
     #+begin_src bash
-    ls -l /dev/disk/by-id/
+    ls -lh /dev/disk/by-id/
     #+end_src
+
 
 3. Create the pool
    #+begin_src bash
@@ -39,6 +43,12 @@ In the future it might be nice to start using something like [[https://github.co
     $(cat pool-name) \
     raidz2 /dev/disk/by-id/your-disk-1 ...
    #+end_src
+
+   Ran command:
+   #+begin_quote
+   sudo zpool create -f -o ashift=12 $(cat pool-name) raidz2 $(cat disks-by-id)
+   #+end_quote
+
 
 4. Add a SLOG
     #+begin_src bash
@@ -50,9 +60,28 @@ In the future it might be nice to start using something like [[https://github.co
 5. Add a special device
     #+begin_src bash
     zpool add $(cat pool-name) special /dev/disk/by-id/your-ssd-id
-
     # To let the special device store small files
     sudo zfs set special_small_blocks=64K $(cat pool-name)
     #+end_src
 
-
+** Datasets:
+*** Immich
+#+begin_src shell
+zfs create -o atime=off -o recordsize=1M $(cat pool-name)/immich
+#+end_src
+*** Syncthing
+#+begin_src shell
+zfs create -o atime=off $(cat pool-name)/syncthing
+#+end_src
+*** Postgres
+#+begin_src shell
+zfs create -o atime=off -o recordsize=16k -o logbias=latency $(cat pool-name)/postgres
+#+end_src
+*** Borg
+#+begin_src shell
+zfs create -o atime=off -o recordsize=1M -o compression=off $(cat pool-name)/borg
+#+end_src
+*** ContainerD
+#+begin_src shell
+zfs create -o recordsize=16K -o atime=off -o xattr=sa -o logbias=latency -o mountpoint=/var/lib/rancher/k3s/agent/containerd/io.containerd.snapshotter.v1.zfs $(cat pool-name)/containerd
+#+end_src

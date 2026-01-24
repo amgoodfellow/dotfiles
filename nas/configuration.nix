@@ -1,8 +1,6 @@
 {
   config,
-  lib,
   pkgs,
-  pool-name,
   ...
 }:
 
@@ -30,74 +28,128 @@
         git
       ];
       openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAamqV7HKSf4DqwP1WpyQJQm5hL0zYeOHELUdyZUoZmg"
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINb/AQAIo486O+aFp+sGvhLmTG/lPjAPUX073gxcl2P2"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAamqV7HKSf4DqwP1WpyQJQm5hL0zYeOHELUdyZUoZmg" # laptop
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINb/AQAIo486O+aFp+sGvhLmTG/lPjAPUX073gxcl2P2" # desktop
       ];
     };
-    # Immich and postgres create users automatically
-    # Syncthing does not, so we create a user for it
     "syncthing" = {
       isSystemUser = true;
       group = "syncthing";
     };
+    "immich" = {
+      isSystemUser = true;
+      group = "immich";
+    };
+  };
+
+  services.borgbackup.repos = {
+    desktop = {
+      authorizedKeys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7TJCsuYZA5UZ9YEEnQM8LWGhyFLqDXXHlWdcKq9QHK amgoodfellow@amgoodfellow-desktop"
+      ];
+      path = "/main-pool/borg/desktop";
+    };
   };
 
   nixpkgs.config.allowUnfree = true;
+
+  # Used for NFS
+  services.rpcbind.enable = true;
 
   # ---    Syncthing   ------------------------------------------
   services.syncthing = {
     enable = true;
     user = "syncthing";
     group = "syncthing";
-    dataDir = "/${pool-name}/syncthing"; # Use the ZFS dataset for data
-    configDir = "/${pool-name}/syncthing"; # Keep config with the data
-    # settings = {
-    #   devices = {
-    #     # "" = {
-    #     #   id = "";
-    #     #   autoAcceptFolders = true;
-    #     #   # NOTE:
-    #     #   #   The following should be added manually to each shared folder
-    #     #   #
-    #     #   #     <param key="cleanoutDays" val="20"></param>
-    #     #   #     <param key="keep" val="20"></param>
-    #     #   #
-    #     #   #   Which ought to keep the last 20 versions of the file, or the last 20 days,
-    #     #   #   whichever comes first
-    #     # };
-    #   };
-    # };
+    dataDir = "/main-pool/syncthing";
+    configDir = "/main-pool/syncthing";
   };
   # -------------------------------------------------------------
 
   # ---  k3S  ----------------------------------------------------
   services.k3s = {
     enable = true;
-    role = "server"; # Runs both server and agent on this node
-    storageDir = "/mnt/k3s"; # Use the dedicated ZFS dataset
+    role = "server";
+    token = builtins.readFile ./k3s-token;
+    clusterInit = true;
+    # Uses the main-pool/containerd zfs pool
+    extraFlags = [
+      "--snapshotter=zfs"
+    ];
   };
   # -------------------------------------------------------------
 
   # --- Immich Service ------------------------------------------
   services.immich = {
     enable = true;
-    # Point Immich to its dedicated ZFS dataset for uploads
-    uploadPath = "/${pool-name}/immich/upload";
-    # Point Immich to its library dataset
-    libraryPath = "/${pool-name}/immich/library";
-    # Tell Immich to use the PostgreSQL socket
-    database.socket = "/run/postgresql";
-    # Use Redis for caching
-    redis.socket = "/run/redis/redis.sock";
+    mediaLocation = "/main-pool/immich";
+    host = "0.0.0.0";
+    port = 2283;
+    database = {
+      enable = true;
+      user = "immich";
+      port = 5432;
+      name = "immich";
+      createDB = true;
+    };
+    environment = {
+      IMMICH_IGNORE_MOUNT_CHECK_ERRORS = "true";
+    };
+    redis.enable = true;
+    openFirewall = true;
+    settings = {
+      newVersionCheck.enabled = false;
+    };
   };
 
-  # Immich requires a database (PostgreSQL) and a cache (Redis)
-  services.redis.enable = true;
+  services.prometheus.exporters.node = {
+    enable = true;
+    port = 9000;
+    enabledCollectors = [
+      "systemd"
+      "perf"
+    ];
+    extraFlags = [
+      "--collector.ethtool"
+      "--collector.softirqs"
+      "--collector.tcpstat"
+      "--collector.wifi"
+    ];
+  };
+
+  services.prometheus = {
+    enable = true;
+    globalConfig.scrape_interval = "30s"; # "1m"
+    scrapeConfigs = [
+      {
+        job_name = "node";
+        static_configs = [
+          {
+            targets = [ "localhost:${toString config.services.prometheus.exporters.node.port}" ];
+          }
+        ];
+      }
+    ];
+  };
+
+  services.grafana = {
+    enable = true;
+    settings = {
+      server = {
+        http_addr = "0.0.0.0";
+        http_port = 3000;
+        enable_gzip = true;
+      };
+      # Prevents Grafana from phoning home
+      analytics.reporting_enabled = false;
+    };
+  };
+
+  # Immich requires a database and a cache
   services.postgresql = {
     enable = true;
     # Use the dedicated ZFS dataset for the database
     dataDir = "/var/lib/postgresql";
-    # Ensure the immich user can connect
     authentication = ''
       local all all ident
     '';
@@ -105,37 +157,49 @@
     ensureUsers = [
       {
         name = "immich";
-        ensureDB = true;
+        ensureDBOwnership = true;
       }
     ];
+    ensureDatabases = [
+      "immich"
+    ];
   };
-  # --- ---------------------------------------------------------
 
   # --- Networking ----------------------------------------------
   networking.hostName = "onsite01";
   services.nfs.server.enable = true;
-  networking.wireless.enable = false;
+  networking.firewall.logRefusedPackets = true;
+  #networking.wireless.enable = false;
   networking.firewall.allowedTCPPorts = [
     # ssh
     22
+    3000
     8080
+    9000
+    8384
+    2283
     22000
-    6443
+    2379 # k3s, etcd clients
+    2380 # k3s, etcd peers
+    6443 # k3s
     10250
   ];
   networking.firewall.allowedUDPPorts = [
     21027
-    8472
+    22000
+    21027
+    8472 # k3s, flannel
   ];
 
   # Make sure the mount points have the correct ownership
   systemd.tmpfiles.rules = [
-    "d /mnt/syncthing 0755 syncthing syncthing -"
-    "d /mnt/immich 0755 immich immich -"
-    "d /mnt/immich/library 0755 immich immich -"
+    "d /main-pool/syncthing 0755 syncthing syncthing -"
+    "d /main-pool/immich 0755 immich immich -"
+    "d /main-pool/immich/library 0755 immich immich -"
     "d /var/lib/postgresql 0700 postgres postgres -"
-    "d /mnt/immich/thumbs 0755 immich immich -"
-    "d /mnt/immich/upload 0755 immich immich -"
-    "d /mnt/k3s 0755 root root -"
+    "d /main-pool/immich/thumbs 0755 immich immich -"
+    "d /main-pool/immich/upload 0755 immich immich -"
+    "d /main-pool/borg/ 0755 borg borg -"
+    "d /main-pool/k3s 0755 root root -"
   ];
 }
