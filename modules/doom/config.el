@@ -1,17 +1,4 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
-
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets.
-(setq user-full-name "Aaron Goodfellow"
-      user-mail-address "amgoodfellow@protonmail.com")
-
-(setq doom-font (font-spec :family "Fira Code" :size 21))
-(setq doom-theme 'doom-gruvbox)
-(setq display-line-numbers-type t)
-
-(setq org-directory "~/Documents/org")
-(setq org-roam-directory "~/Documents/org/roam")
-
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
@@ -41,43 +28,56 @@
 ;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
 ;; etc).
 
+
+;; Pre package load variables --------------------------------------------------
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
+(setq user-full-name "Aaron Goodfellow"
+      user-mail-address "amgoodfellow@protonmail.com")
+
+;; Theme Config
+(setq doom-font (font-spec :family "Fira Code" :size 21))
+(setq doom-theme 'doom-gruvbox)
+(setq display-line-numbers-type t)
+
+;; Org Variables
+(setq org-directory "~/Documents/org")
+(setq org-roam-directory "~/Documents/org/roam")
+(setq initial-major-mode 'org-mode)
+
+;; Disable formatting on certain modes
+(setq +format-on-save-disabled-modes
+      '(;; Defaults
+        sql-mode
+        tex-mode
+        latex-mode
+        LaTeX-mode
+        org-msg-edit-mode
+        ;; custom
+        java-mode))
+
+;; Post package load variables -------------------------------------------------
+
 (after! evil
   (setq evil-escape-key-sequence "jj")
-  (setq evil-escape-delay 0.45))
+  (setq evil-escape-delay 0.45)
+  (map! :map evil-window-map
+        (:leader
+         (:prefix ("w" . "Select Window")
+          :n :desc "Left"  "<left>" 'evil-window-left
+          :n :desc "Up"    "<up>" 'evil-window-up
+          :n :desc "Down"  "<down>" 'evil-window-down
+          :n :desc "Right" "<right>" 'evil-window-right
+          ))))
 
 (after! rustic
   (setq rustic-lsp-server 'rust-analyzer))
 
-(setq initial-major-mode 'org-mode)
-
-(use-package! gleam-ts-mode
-  :config
-  ;; setup formatter to be used by `SPC c f`
-  (after! apheleia
-    (setf (alist-get 'gleam-ts-mode apheleia-mode-alist) 'gleam)
-    (setf (alist-get 'gleam apheleia-formatters) '("gleam" "format" "--stdin"))))
-
-(after! treesit
-  (add-to-list 'auto-mode-alist '("\\.gleam$" . gleam-ts-mode)))
-
-(after! eglot
-  :config
-  (set-eglot-client! 'gleam-ts-mode '("gleam" "lsp")))
-
-(after! gleam-ts-mode
-  (unless (treesit-language-available-p 'gleam)
-    ;; compile the treesit grammar file the first time
-    (gleam-ts-install-grammar)))
-
-
-;; Org mode configurations
 (after! org
   (setq org-todo-keywords
         '((sequence "UNASSIGNED" "ASSIGNED" "IN-PROGRESS" "|" "BLOCKED" "DONE")
           (sequence "TODO" "WAITING" "|" "DONE")))
-
-
-
   (setq-default elfeed-search-filter "@1-day-ago +unread ")
   (setq org-babel-clojure-backend 'cider)
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
@@ -104,17 +104,6 @@
         :ni "C-c n c" 'org-roam-capture))
 
 
-(after! evil
-  (map! :map evil-window-map
-        (:leader
-         (:prefix ("w" . "Select Window")
-          :n :desc "Left"  "<left>" 'evil-window-left
-          :n :desc "Up"    "<up>" 'evil-window-up
-          :n :desc "Down"  "<down>" 'evil-window-down
-          :n :desc "Right" "<right>" 'evil-window-right
-          ))))
-
-;; End org specific things
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

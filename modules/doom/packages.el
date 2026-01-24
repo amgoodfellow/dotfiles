@@ -9,6 +9,7 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;; (package! some-package)
 
+(package! org-chef)
 (package! websocket)
 (package! orgtbl-aggregate)
 
@@ -18,15 +19,18 @@
 ;; (package! another-package
 ;;   :recipe (:host github :repo "username/repo"))
 
-(package! gleam-ts-mode
+;; (package! gleam-ts-mode
+;;   :recipe (:host github
+;;            :repo "gleam-lang/gleam-mode"
+;;            :branch "main"
+;;            :files ("gleam-ts-*.el")))
+
+(package! gfm-alerts-mode
+  :pin "ec781d253dd0e9c01384ca23cdf6786e1777f520"
   :recipe (:host github
-           :repo "gleam-lang/gleam-mode"
-           :branch "main"
-           :files ("gleam-ts-*.el")))
+           :repo "egregius313/gfm-alerts.el"
+           :files ("gfm-alerts.el")))
 
-
-                                        ;(package! verb
-                                        ;  :recipe (:host github :repo "federicotdn/verb"))
 
 ;; If the package you are trying to install does not contain a PACKAGENAME.el
 ;; file, or is located in a subdirectory of the repo, you'll need to specify

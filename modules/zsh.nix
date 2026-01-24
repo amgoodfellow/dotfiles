@@ -1,14 +1,23 @@
-{ config, lib, pkgs, ... }: {
+{
+  ...
+}:
+{
   programs.zsh = {
     antidote = {
       enable = true;
       plugins = [ "sindresorhus/pure" ];
     };
     enable = true;
+    enableCompletion = true;
     autosuggestion.enable = true;
-    history.extended = true;
-    history.findNoDups = true;
     historySubstringSearch.enable = true;
+    history = {
+      append = true; # allows for multiple writers to zsh hist file
+      expireDuplicatesFirst = true;
+      extended = true;
+      findNoDups = true;
+
+    };
     initContent = ''
       # I can never remember the commands for different compressed files
       extract () {
@@ -41,9 +50,6 @@
     shellAliases = {
       ls = "eza";
       ll = "eza --long --all";
-      pformat = ''
-        find src/ -name "*.js" -exec prettier --write --no-semi --single-quote {} ;'';
-      hm-update = "home-manager --flake .#desktop";
     };
     syntaxHighlighting.enable = true;
   };
