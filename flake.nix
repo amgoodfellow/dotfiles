@@ -78,8 +78,8 @@
           modules = [
             ./common-home.nix
             ./modules/vim/neovim.nix
-            ./git/git.nix
-            ./zsh.nix
+            ./modules/git/git.nix
+            ./modules/zsh.nix
             stylix.homeModules.stylix
           ];
         };

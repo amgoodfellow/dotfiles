@@ -41,10 +41,6 @@
         fi
       }
 
-      cd () {
-        builtin cd "$@";
-        eza;
-      }
     '';
     profileExtra = "";
     shellAliases = {

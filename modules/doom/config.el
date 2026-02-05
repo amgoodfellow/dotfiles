@@ -85,24 +85,104 @@
   (setq org-agenda-todo-ignore-scheduled 'future)
   (setq org-agenda-todo-ignore-scheduled t)
   (setq org-agenda-tags-todo-honor-ignore-options t)
-  ;; log the time when I clock out
   (setq org-log-done 'time)
-
+  (setq org-todo-keywords
+        '((sequence "UNASSIGNED" "ASSIGNED" "IN-PROGRESS" "|" "BLOCKED" "DONE")
+          (sequence "TODO" "WAITING" "|" "DONE")))
   (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline "~/Documents/org/tasks.org" "Personal")
-           "* TODO %^{title?}\n")
-          ("T" "Todo Clipboard" entry (file "~/Documents/org/inbox.org")
-           "* TODO %?\n%U\n   %c" :empty-lines 1)
-          ("w" "Work Task" entry (file+headline "~/Documents/org/tasks.org" "Work")
-           "* TODO %^{title?}%^{CATEGORY}p%^{CREATED_AT|%U}p\n%?")
-          ("p" "Personal Task" entry (file+headline "~/Documents/org/tasks.org" "Personal")
-           "* TODO %^{title?}%^{CATEGORY}p%^{CREATED_AT|%U}p\n%?")))
+        (doct `(
+                ("Clipboard Todo" :keys "C"
+                 :type entry
+                 :file "~/Documents/org/tasks.org"
+                 :headline "Personal"
+                 :template "* TODO %?\n%U\n   %c")
+                ("Task" :keys "t"
+                 :type entry
+                 :file "~/Documents/org/tasks.org"
+                 :headline "Personal"
+                 :template "* TODO %^{title?}%^{CATEGORY}p%^{CREATED_AT|%U}p\n%?")
+                ("Work" :keys "w"
+                 :children (
+                            ;; Typical task items
+                            ("Task" :keys "t" :type entry :file "~/Documents/org/tasks.org")
+                            ;; Typical task items
+                            ("Meeting" :keys "m" :type entry :datetree t :file "~/Documents/org/meetings.org")
+                            ;; These items represent capturing thoughts to add to the next persistent meeting
+                            (:group "Thoughts" :type item :file "~/Documents/org/thoughts.org" :children
+                                    (("Standup Notes" :keys "s" :headline "Standup")
+                                     ("Retro Notes"    :keys "r" :headline "Retro"
+                                      :function ,(defun +org-capture-goto ()
+                                                   "Move point to location of interactively selected heading."
+                                                   (let ((org-goto-interface 'outline-path-completion))
+                                                     (org-goto))))
+                                     ("Sprint Planning Notes" :keys "p" :headline "Sprint Planning")
+                                     ("One on One Notes" :keys "o" :headline "One on One"))))))))
 
+  ;; Org roam config
   (map! :map (org-roam-mode-map org-mode-map)
         :ni "C-c n i" 'org-roam-node-insert
         :ni "C-c n f" 'org-roam-node-find
-        :ni "C-c n c" 'org-roam-capture))
+        :ni "C-c n c" 'org-roam-capture)
 
+  ;; Org babel
+  (setq org-babel-clojure-backend 'cider)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
+  ;; Elfeed
+  (setq-default elfeed-search-filter "@1-day-ago +unread ")
+
+  ;; Org super agenda settings
+  ;; (let ((org-super-agenda-groups
+  ;;        '(;; Each group has an implicit boolean OR operator between its selectors.
+  ;;          (:name "Today"  ; Optionally specify section name
+  ;;           :time-grid t  ; Items that appear on the time grid
+  ;;           :todo "TODAY")  ; Items that have this TODO keyword
+  ;;          (:name "Important"
+  ;;           ;; Single arguments given alone
+  ;;           :tag "bills"
+  ;;           :priority "A")
+  ;;          ;; Set order of multiple groups at once
+  ;;          (:order-multi (2 (:name "Shopping in town"
+  ;;                            ;; Boolean AND group matches items that match all subgroups
+  ;;                            :and (:tag "shopping" :tag "@town"))
+  ;;                           (:name "Food-related"
+  ;;                            ;; Multiple args given in list with implicit OR
+  ;;                            :tag ("food" "dinner"))
+  ;;                           (:name "Personal"
+  ;;                            :habit t
+  ;;                            :tag "personal")
+  ;;                           (:name "Space-related (non-moon-or-planet-related)"
+  ;;                            ;; Regexps match case-insensitively on the entire entry
+  ;;                            :and (:regexp ("space" "NASA")
+  ;;                                  ;; Boolean NOT also has implicit OR between selectors
+  ;;                                  :not (:regexp "moon" :tag "planet")))))
+  ;;          ;; Groups supply their own section names when none are given
+  ;;          (:todo "WAITING" :order 8)  ; Set order of this section
+  ;;          (:todo ("SOMEDAY" "TO-READ" "CHECK" "TO-WATCH" "WATCHING")
+  ;;           ;; Show this group at the end of the agenda (since it has the
+  ;;           ;; highest number). If you specified this group last, items
+  ;;           ;; with these todo keywords that e.g. have priority A would be
+  ;;           ;; displayed in that group instead, because items are grouped
+  ;;           ;; out in the order the groups are listed.
+  ;;           :order 9)
+  ;;          (:priority<= "B"
+  ;;           ;; Show this section after "Today" and "Important", because
+  ;;           ;; their order is unspecified, defaulting to 0. Sections
+  ;;           ;; are displayed lowest-number-first.
+  ;;           :order 1)
+  ;;          ;; After the last group, the agenda will display items that didn't
+  ;;          ;; match any of these groups, with the default order position of 99
+  ;;          )))
+  ;;   (org-agenda nil "a"))
+  ;; (let ((org-super-agenda-groups
+  ;;        '((:auto-group t))))
+  ;;   (org-agenda-list))
+
+  ;; (let ((org-super-agenda-groups
+  ;;        '((:auto-category t))))
+  ;;   (org-agenda-list))
+
+  )
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
